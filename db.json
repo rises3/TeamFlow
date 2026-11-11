@@ -1,0 +1,81 @@
+{
+"users": [
+{"id": 1, "name": "Kiss Anna", "email": "anna@example.com",
+"role": "Frontend fejlesztő", "active": true},
+{"id": 2, "name": "Nagy Bence", "email": "bence@example.com",
+"role": "Frontend fejlesztő", "active": true}
+],
+"projects": [
+{"id": 1, "name": "TeamFlow webalkalmazás",
+"description": "A csapat közös feladatkezelő alkalmazása.", "ownerId": 1,
+"status": "active", "startDate": "2026-11-16", "dueDate": "2026-12-11"},
+{"id": 2, "name": "Dokumentáció és bemutató",
+"description": "Tesztelés, dokumentáció és angol prezentáció.", "ownerId": 2,
+"status": "active", "startDate": "2026-11-16", "dueDate": "2026-12-11"}
+],
+"tasks": [
+{"id": 1, "projectId": 1, "title": "Reszponzív feladatlista",
+"description": "A feladatlista asztali és mobil nézetének elkészítése.",
+"assigneeId": 1, "statusId": 2, "priorityId": 3, "dueDate": "2026-12-04",
+"estimateHours": 6, "labelIds": [1, 2]},
+{"id": 2, "projectId": 1, "title": "API service réteg",
+"description": "Típusos HttpClient CRUD service-ek készítése.", "assigneeId": 2,
+"statusId": 1, "priorityId": 3, "dueDate": "2026-12-05", "estimateHours": 5,
+"labelIds": [3]},
+{"id": 3, "projectId": 1, "title": "Dashboard statisztikák",
+"description": "Az összesített mutatók megjelenítése.", "assigneeId": 1,
+"statusId": 3, "priorityId": 2, "dueDate": "2026-12-03", "estimateHours": 3,
+"labelIds": [1]},
+{"id": 4, "projectId": 1, "title": "Űrlap validáció",
+"description": "Kliensoldali ellenőrzések és hibaüzenetek.", "assigneeId": 2,
+"statusId": 1, "priorityId": 2, "dueDate": "2026-12-07", "estimateHours": 4,
+"labelIds": [2]},
+{"id": 5, "projectId": 2, "title": "Projekt részletező",
+"description": "Tagok és kapcsolódó feladatok listázása.", "assigneeId": 1,
+"statusId": 2, "priorityId": 2, "dueDate": "2026-12-08", "estimateHours": 4,
+"labelIds": [1]},
+{"id": 6, "projectId": 2, "title": "Angol prezentáció",
+"description": "Húsz diás bemutató készítése és előadása.", "assigneeId": 2,
+"statusId": 1, "priorityId": 1, "dueDate": "2026-12-11", "estimateHours": 3,
+"labelIds": [2]}
+],
+"comments": [
+{"id": 1, "taskId": 1, "userId": 2, "body": "A mobil nézetnél legyenek kártyák.",
+"createdAt": "2026-11-18T09:00:00Z"},
+{"id": 2, "taskId": 1, "userId": 1, "body": "Rendben, a szűrőket is átrendezem.",
+"createdAt": "2026-11-18T10:15:00Z"}
+
+],
+"labels": [
+{"id": 1, "name": "Frontend", "color": "#315CE8"},
+{"id": 2, "name": "UI", "color": "#7C3AED"},
+{"id": 3, "name": "API", "color": "#0F766E"}
+],
+"statuses": [
+{"id": 1, "name": "Tervezett", "key": "todo", "color": "#667085", "order": 1},
+{"id": 2, "name": "Folyamatban", "key": "doing", "color": "#315CE8", "order": 2},
+{"id": 3, "name": "Kész", "key": "done", "color": "#087F5B", "order": 3}
+],
+"priorities": [
+{"id": 1, "name": "Alacsony", "level": 1},
+{"id": 2, "name": "Normál", "level": 2},
+{"id": 3, "name": "Magas", "level": 3}
+],
+"timeEntries": [
+{"id": 1, "taskId": 1, "userId": 1, "minutes": 90, "date": "2026-11-18",
+"note": "Asztali elrendezés"},
+{"id": 2, "taskId": 1, "userId": 2, "minutes": 60, "date": "2026-11-18",
+"note": "Mobil szűrők"}
+],
+"checklistItems": [
+{"id": 1, "taskId": 1, "text": "Asztali táblázat", "done": true},
+{"id": 2, "taskId": 1, "text": "Mobil kártyák", "done": false},
+{"id": 3, "taskId": 1, "text": "Billentyűzetes bejárás", "done": false}
+],
+"projectMembers": [
+{"id": 1, "projectId": 1, "userId": 1, "role": "UI és routing"},
+{"id": 2, "projectId": 1, "userId": 2, "role": "API és űrlapok"},
+{"id": 3, "projectId": 2, "userId": 1, "role": "Dokumentáció"},
+{"id": 4, "projectId": 2, "userId": 2, "role": "Prezentáció"}
+]
+}
