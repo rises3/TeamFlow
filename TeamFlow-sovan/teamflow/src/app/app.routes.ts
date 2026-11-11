@@ -1,8 +1,8 @@
 import { Routes } from '@angular/router';
-import { Tasks } from './tasks/tasks';
-import { Projects } from './projects/projects';
-import { Team } from './team/team';
-import { NotFound } from './not-found/not-found';
+import { Tasks } from './features/tasks/tasks';
+import { Projects } from './features/projects/projects';
+import { Team } from './features/team/team';
+import { NotFound } from './features/not-found/not-found';
 
 export const routes: Routes = [
      {path: "", redirectTo: "dashboard"},
