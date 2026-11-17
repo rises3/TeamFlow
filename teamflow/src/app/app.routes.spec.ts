@@ -12,6 +12,6 @@ describe('app routes', () => {
     await harness.navigateByUrl('/', Dashboard);
 
     expect(TestBed.inject(Router).url).toBe('/dashboard');
-    expect(harness.routeNativeElement?.querySelector('h1')).toBeTruthy();
+    expect(harness.routeNativeElement?.textContent).toContain('Áttekintés');
   });
 });

@@ -1,49 +1,15 @@
 <div class="app">
-  <aside class="sidebar">
-    <div class="brand">
-      <div class="brand__logo">T</div>
-      <span class="brand__name">TeamFlow</span>
-    </div>
-
-    <div class="nav__label">Munkaterület</div>
-    <nav aria-label="Fő navigáció">
-      <a class="nav__item" [routerLink]="['/dashboard']">
-        <span class="nav__icon">A</span>
-        Áttekintés
-      </a>
-      <a class="nav__item" [routerLink]="['/tasks']">
-        <span class="nav__icon">F</span>
-        Feladatok
-      </a>
-      <a class="nav__item nav__item--active" [routerLink]="['/projects']" aria-current="page">
-        <span class="nav__icon">P</span>
-        Projektek
-      </a>
-      <a class="nav__item" [routerLink]="['/team']">
-        <span class="nav__icon">C</span>
-        Csapat
-      </a>
-      <a class="nav__item" [routerLink]="['/admin']">
-        <span class="nav__icon">T</span>
-        Törzsadatok
-      </a>
-    </nav>
-
-    <div class="user">
-      <div class="user__avatar">KA</div>
-      <div>
-        <div class="user__name">Kiss Anna</div>
-        <div class="user__role">Csapattag</div>
-      </div>
-    </div>
-  </aside>
+  <app-sidebar />
 
   <main class="main">
-    <header class="topbar">
-      <div class="breadcrumb">Frontend projekt <span>/</span> Csapatmunka</div>
-      <div class="pill">2 csapattag</div>
-    </header>
-
+    <app-confirm-delete
+      *ngIf="pendingMemberRemoval as pending"
+      title="Eltávolítod a tagot a projektből?"
+      [item]="pending.name"
+      description="A projekttagság törlődik."
+      (cancelled)="pendingMemberRemoval = null"
+      (confirmed)="confirmMemberRemoval()"
+    />
     <ng-container *ngIf="isNew(); else projectViews">
       <div class="content project-create">
         <div class="page-head project-create__head">
@@ -65,8 +31,14 @@
               Tulajdonos *
               <select name="owner" [(ngModel)]="draft.owner" required>
                 <option value="" disabled>Válassz csapattagot</option>
-                <option>Kiss Anna</option>
-                <option>Nagy Bence</option>
+                <option *ngFor="let member of teamMembers()" [value]="member.name">{{ member.name }}</option>
+              </select>
+            </label>
+            <label>
+              Állapot *
+              <select name="status" [(ngModel)]="draft.status" required>
+                <option value="active">Aktív</option>
+                <option value="archived">Archivált</option>
               </select>
             </label>
             <label>
@@ -90,6 +62,7 @@
               <button class="btn-primary" type="submit" [disabled]="projectForm.invalid">Mentés</button>
             </div>
           </div>
+          <p *ngIf="validationError" role="alert">{{ validationError }}</p>
         </form>
       </div>
     </ng-container>
@@ -109,7 +82,7 @@
 
       <section class="detail-card project-summary">
         <p>{{ selectedProject().description }}</p>
-        <span class="project-card__status">Aktív</span>
+        <span class="project-card__status">{{ selectedProject().status === 'active' ? 'Aktív' : 'Archivált' }}</span>
         <p class="project-summary__meta">
           Tulajdonos: {{ selectedProject().owner }}
           <span>·</span>
@@ -120,8 +93,24 @@
       <section class="project-detail__section">
         <div class="detail-card__head">
           <h2 class="section-title">Projekt tagok</h2>
-          <button class="link-button" type="button">+ Tag felvétele</button>
+          <button class="link-button" type="button" (click)="startMemberEdit()">+ Tag felvétele</button>
         </div>
+        <form *ngIf="memberFormOpen" class="detail-card edit-task-form" (ngSubmit)="saveMember()">
+          <label>Csapattag
+            <select name="memberUserId" [(ngModel)]="memberUserId" [disabled]="editingMemberId !== null">
+              <option [ngValue]="0">Válassz csapattagot</option>
+              <option *ngFor="let member of teamMembers()" [ngValue]="member.id">{{ member.name }}</option>
+            </select>
+          </label>
+          <label>Szerepkör
+            <input name="memberRole" [(ngModel)]="memberRole" maxlength="40" />
+          </label>
+          <div class="task-detail__actions">
+            <button class="btn-primary" type="submit">Mentés</button>
+            <button class="btn-outline" type="button" (click)="memberFormOpen = false">Mégse</button>
+          </div>
+          <p *ngIf="memberError" role="alert">{{ memberError }}</p>
+        </form>
         <div class="project-members">
           <article class="project-member" *ngFor="let member of selectedProject().members">
             <span class="project-member__avatar">{{ member.initials }}</span>
@@ -130,8 +119,8 @@
               <span>{{ member.role }}</span>
             </div>
             <div class="project-member__actions">
-              <button class="link-button" type="button">Szerk.</button>
-              <button class="link-button" type="button">Eltávolítás</button>
+              <button class="link-button" type="button" (click)="startMemberEdit(member)">Szerk.</button>
+              <button class="link-button" type="button" (click)="removeMember(member.userId)">Eltávolítás</button>
             </div>
           </article>
         </div>
@@ -166,14 +155,14 @@
       <div class="page-head projects__head">
         <div>
           <h1 class="page-title">Projektek</h1>
-          <p class="page-sub">{{ projects().length }} aktív projekt · közös célok</p>
+          <p class="page-sub">{{ projects().length }} projekt · közös célok</p>
         </div>
         <button class="btn-primary" type="button" [routerLink]="['/projects', 'new']">+ Új projekt</button>
       </div>
 
       <section class="project-grid" aria-label="Aktív projektek">
         <article class="project-card" *ngFor="let project of projects()">
-          <span class="project-card__status">Aktív</span>
+          <span class="project-card__status">{{ project.status === 'active' ? 'Aktív' : 'Archivált' }}</span>
           <h2 class="project-card__title">{{ project.name }}</h2>
           <p class="project-card__description">{{ project.description }}</p>
 

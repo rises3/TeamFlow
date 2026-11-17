@@ -1,49 +1,24 @@
 <div class="app">
-  <aside class="sidebar">
-    <div class="brand">
-      <div class="brand__logo">T</div>
-      <span class="brand__name">TeamFlow</span>
-    </div>
-
-    <div class="nav__label">Munkaterület</div>
-    <nav aria-label="Fő navigáció">
-      <a class="nav__item" [routerLink]="['/dashboard']">
-        <span class="nav__icon">A</span>
-        Áttekintés
-      </a>
-      <a class="nav__item nav__item--active" [routerLink]="['/tasks']" aria-current="page">
-        <span class="nav__icon">F</span>
-        Feladatok
-      </a>
-      <a class="nav__item" [routerLink]="['/projects']">
-        <span class="nav__icon">P</span>
-        Projektek
-      </a>
-      <a class="nav__item" [routerLink]="['/team']">
-        <span class="nav__icon">C</span>
-        Csapat
-      </a>
-      <a class="nav__item" [routerLink]="['/admin']">
-        <span class="nav__icon">T</span>
-        Törzsadatok
-      </a>
-    </nav>
-
-    <div class="user">
-      <div class="user__avatar">KA</div>
-      <div>
-        <div class="user__name">Kiss Anna</div>
-        <div class="user__role">Csapattag</div>
-      </div>
-    </div>
-  </aside>
+  <app-sidebar />
 
   <main class="main">
-    <header class="topbar">
-      <div class="breadcrumb">Frontend projekt <span>/</span> Csapatmunka</div>
-      <div class="pill">2 csapattag</div>
-    </header>
-
+    <app-confirm-delete
+      *ngIf="pendingDelete() as task"
+      title="Törlöd ezt a feladatot?"
+      [item]="'#' + task.id + ' ' + task.title"
+      description="A feladat és a hozzá tartozó bejegyzések törlődnek."
+      (cancelled)="pendingDelete.set(null)"
+      (confirmed)="confirmDelete()"
+    />
+    <app-confirm-delete
+      *ngIf="pendingChecklistDelete() as item"
+      title="Törlöd ezt az ellenőrzőlista-elemet?"
+      [item]="item.text"
+      (cancelled)="pendingChecklistDelete.set(null)"
+      (confirmed)="confirmChecklistDelete()"
+    />
+    <ng-container *ngIf="loadState() === 'ready'; else loadingOrError">
+    <p *ngIf="operationError" class="state-card state-card--error" role="alert">{{ operationError }}</p>
     <ng-container *ngIf="isNew(); else taskPage">
       <div class="content task-create">
         <div class="page-head task-create__head">
@@ -100,7 +75,7 @@
             </label>
             <label>
               Becsült idő órában *
-              <input name="estimate" [(ngModel)]="draft.estimate" type="number" min="0.5" step="0.5" required />
+              <input name="estimate" [(ngModel)]="draft.estimate" type="number" min="0.5" max="100" step="any" required />
             </label>
             <label class="new-task-form__description">
               Leírás
@@ -119,15 +94,17 @@
             <span>* Kötelező mezők</span>
             <div class="task-detail__actions">
               <button class="btn-outline" type="button" (click)="cancelEditing()">Mégse</button>
-              <button class="btn-primary" type="submit" [disabled]="createForm.invalid">Mentés</button>
+              <button class="btn-primary" type="submit" [disabled]="createForm.invalid || saving()">Mentés</button>
             </div>
           </div>
+          <p *ngIf="validationError" role="alert">{{ validationError }}</p>
         </form>
       </div>
     </ng-container>
 
     <ng-template #taskPage>
       <div class="content task-detail" *ngIf="isDetail(); else taskList">
+        <ng-container *ngIf="selectedTask() as task; else missingTask">
         <form class="detail-card edit-task-form" *ngIf="isEditing(); else taskDetails" (ngSubmit)="saveTask()">
           <h1 class="page-title">Feladat szerkesztése</h1>
           <label>
@@ -151,6 +128,7 @@
               Prioritás
               <select name="priority" [(ngModel)]="draft.priority">
                 <option>Alacsony</option>
+                <option>Normál</option>
                 <option>Közepes</option>
                 <option>Magas</option>
               </select>
@@ -177,20 +155,21 @@
             </label>
           </div>
           <div class="task-detail__actions">
-            <button class="btn-primary" type="submit">Mentés</button>
+            <button class="btn-primary" type="submit" [disabled]="saving()">Mentés</button>
             <button class="btn-danger" type="button" (click)="cancelEditing()">Mégse</button>
           </div>
+          <p *ngIf="validationError" role="alert">{{ validationError }}</p>
         </form>
 
         <ng-template #taskDetails>
         <div class="task-detail__head">
           <div>
-            <h1 class="page-title">{{ selectedTask().title }}</h1>
-            <p class="page-sub">#{{ selectedTask().id }} <span>·</span> {{ selectedTask().project }}</p>
+            <h1 class="page-title">{{ task.title }}</h1>
+            <p class="page-sub">#{{ task.id }} <span>·</span> {{ task.project }}</p>
           </div>
           <div class="task-detail__actions">
-            <button class="btn-primary" type="button" (click)="startEditing()">Szerkesztés</button>
-            <button class="btn-danger" type="button" (click)="deleteTask()">Törlés</button>
+            <button class="btn-primary" type="button" (click)="startEditing()" [disabled]="saving()">Szerkesztés</button>
+            <button class="btn-danger" type="button" (click)="deleteTask()" [disabled]="saving()">Törlés</button>
           </div>
         </div>
 
@@ -198,7 +177,7 @@
           <div class="task-detail__main">
             <section class="detail-card">
               <h2 class="detail-card__title">Leírás</h2>
-              <p>{{ selectedTask().description }}</p>
+              <p>{{ task.description }}</p>
               <div class="task-labels">
                 <span>Frontend</span>
                 <span>UI</span>
@@ -208,38 +187,38 @@
             <section class="detail-card">
               <div class="detail-card__head">
                 <h2 class="detail-card__title">Ellenőrzőlista</h2>
-                <span>1 / 3</span>
+                <span>{{ checklist().length }} elem</span>
               </div>
-              <label class="checklist-item">
-                <input type="checkbox" checked />
-                <span>Asztali táblázat</span>
-                <a class="link" [routerLink]="['/tasks', selectedTask().id, 'edit']">Szerk.</a>
-                <button class="link-button" type="button">Törlés</button>
-              </label>
-              <label class="checklist-item">
-                <input type="checkbox" />
-                <span>Mobil kártyák</span>
-                <a class="link" [routerLink]="['/tasks', selectedTask().id, 'edit']">Szerk.</a>
-                <button class="link-button" type="button">Törlés</button>
-              </label>
-              <label class="checklist-item">
-                <input type="checkbox" />
-                <span>Billentyűzetes bejárás</span>
-                <a class="link" [routerLink]="['/tasks', selectedTask().id, 'edit']">Szerk.</a>
-                <button class="link-button" type="button">Törlés</button>
-              </label>
+              <div class="checklist-item" *ngFor="let item of checklist()">
+                <label><input type="checkbox" [ngModel]="item.done" (ngModelChange)="toggleChecklist(item, $event)" /> {{ item.text }}</label>
+                <button class="link-button" type="button" (click)="editChecklist(item)">Szerk.</button>
+                <button class="link-button" type="button" (click)="deleteChecklist(item)">Törlés</button>
+              </div>
+              <form class="edit-task-form" (ngSubmit)="saveChecklist()">
+                <label>Új ellenőrzőlista-elem
+                  <input name="checklistText" [(ngModel)]="checklistText" maxlength="120" />
+                </label>
+                <button class="btn-outline" type="submit">{{ editingChecklistId === null ? 'Hozzáadás' : 'Mentés' }}</button>
+                <p *ngIf="checklistError" role="alert">{{ checklistError }}</p>
+              </form>
             </section>
 
             <section class="detail-card">
               <div class="detail-card__head">
                 <h2 class="detail-card__title">Hozzászólások</h2>
-                <button class="link-button" type="button">+ Hozzászólás</button>
               </div>
-              <div class="comment">
-                <strong>Nagy Bence</strong>
-                <p>A mobil nézetnél legyenek kártyák.</p>
-                <small>Kiss Anna: Rendben, a szűrőket is átrendezem.</small>
+              <div class="comment" *ngFor="let comment of comments()">
+                <strong>{{ comment.author }}</strong>
+                <p>{{ comment.body }}</p>
+                <small>{{ comment.createdAt }}</small>
               </div>
+              <form class="edit-task-form" (ngSubmit)="saveComment()">
+                <label>Hozzászólás
+                  <textarea name="commentBody" [(ngModel)]="commentBody" maxlength="500" rows="2"></textarea>
+                </label>
+                <button class="btn-outline" type="submit">Hozzászólás</button>
+                <p *ngIf="commentError" role="alert">{{ commentError }}</p>
+              </form>
             </section>
           </div>
 
@@ -247,12 +226,12 @@
             <section class="detail-card">
               <h2 class="detail-card__title">Feladat adatai</h2>
               <dl class="task-properties">
-                <div><dt>Állapot</dt><dd><span class="badge {{ selectedTask().statusClass }}">{{ selectedTask().status }}</span></dd></div>
-                <div><dt>Prioritás</dt><dd>{{ selectedTask().priority }}</dd></div>
-                <div><dt>Felelős</dt><dd>{{ selectedTask().assignee }}</dd></div>
-                <div><dt>Határidő</dt><dd>{{ selectedTask().dueDate }}</dd></div>
-                <div><dt>Becsült idő</dt><dd>{{ selectedTask().estimate }}</dd></div>
-                <div><dt>Rögzített idő</dt><dd>{{ selectedTask().tracked }}</dd></div>
+                <div><dt>Állapot</dt><dd><span class="badge {{ task.statusClass }}">{{ task.status }}</span></dd></div>
+                <div><dt>Prioritás</dt><dd>{{ task.priority }}</dd></div>
+                <div><dt>Felelős</dt><dd>{{ task.assignee }}</dd></div>
+                <div><dt>Határidő</dt><dd>{{ task.dueDate }}</dd></div>
+                <div><dt>Becsült idő</dt><dd>{{ task.estimate }}</dd></div>
+                <div><dt>Rögzített idő</dt><dd>{{ task.tracked }}</dd></div>
               </dl>
             </section>
 
@@ -260,33 +239,50 @@
               <div class="detail-card__head">
                 <h2 class="detail-card__title">Időnapló</h2>
               </div>
-              <div class="time-entry">
-                <div>90 perc <span>·</span> Kiss Anna</div>
-                <small>Asztali elrendezés</small>
+              <div class="time-entry" *ngFor="let entry of timeEntries()">
+                <div>{{ entry.minutes }} perc <span>·</span> {{ entry.user }} <span>·</span> {{ entry.date }}</div>
+                <small>{{ entry.note }}</small>
               </div>
-              <div class="time-entry">
-                <div>60 perc <span>·</span> Nagy Bence</div>
-              </div>
-              <button class="btn-outline" type="button">+ Idő rögzítése</button>
+              <form class="edit-task-form" (ngSubmit)="saveTimeEntry()">
+                <label>Perc
+                  <input name="minutes" type="number" min="1" max="480" step="1" [(ngModel)]="timeDraft.minutes" />
+                </label>
+                <label>Dátum
+                  <input name="date" type="date" [(ngModel)]="timeDraft.date" />
+                </label>
+                <label>Megjegyzés
+                  <input name="note" [(ngModel)]="timeDraft.note" maxlength="200" />
+                </label>
+                <button class="btn-outline" type="submit" [disabled]="saving()">Idő rögzítése</button>
+                <p *ngIf="timeError" role="alert">{{ timeError }}</p>
+              </form>
             </section>
           </aside>
         </div>
         </ng-template>
+        </ng-container>
+        <ng-template #missingTask>
+          <div class="state-card" role="status">
+            <h1>Feladat nem található</h1>
+            <p class="state-card__description">Ez a feladat nem létezik vagy már törölték.</p>
+            <a class="link" [routerLink]="['/tasks']">Vissza a feladatokhoz</a>
+          </div>
+        </ng-template>
       </div>
     <ng-template #taskList>
-    <div class="content">
+    <div class="content tasks-page">
       <div class="page-head">
         <div>
           <h1 class="page-title">Feladatok</h1>
-          <p class="page-sub">{{ tasks().length }} feladat · 2 projekt · minden állapot</p>
+          <p class="page-sub">{{ tasks().length }} feladat · 2 projekt <span class="tasks-page__summary-extra">· minden állapot</span></p>
         </div>
         <button class="btn-primary" [routerLink]="['/tasks', 'new']">+ Új feladat</button>
       </div>
 
-      <form aria-label="Feladatok szűrése">
+      <form class="tasks__filters" aria-label="Feladatok szűrése">
         <label>
           Keresés
-          <input type="search" placeholder="Keresés a feladatok között..." />
+          <input type="search" name="search" [ngModel]="searchText()" (ngModelChange)="searchText.set($event)" placeholder="Keresés a feladatok között..." />
         </label>
         <label>
           Állapot
@@ -315,7 +311,13 @@
         </label>
       </form>
 
-      <div class="table" role="table" aria-label="Feladatok">
+      <div class="state-card" *ngIf="filteredTasks().length === 0" role="status">
+        <div class="state-card__badge">Üres találati lista</div>
+        <h2>Nincs találat</h2>
+        <p class="state-card__description">Módosítsd a keresést.</p>
+        <button class="btn-outline" type="button" (click)="searchText.set('')">Keresés törlése</button>
+      </div>
+      <div class="table tasks-table" *ngIf="filteredTasks().length > 0" role="table" aria-label="Feladatok">
         <div class="row row--head" role="row">
           <div role="columnheader">Feladat</div>
           <div role="columnheader">Állapot</div>
@@ -323,21 +325,39 @@
           <div role="columnheader">Határidő</div>
           <div role="columnheader">Művelet</div>
         </div>
-        <div class="row" role="row" *ngFor="let task of tasks()">
-          <div role="cell">
+        <div class="row" role="row" *ngFor="let task of filteredTasks()">
+          <div role="cell" class="tasks-table__task">
             <div class="task__title">{{ task.title }}</div>
             <div class="task__meta">#{{ task.id }} <span>·</span> {{ task.project }}</div>
           </div>
-          <div role="cell"><span class="badge" [ngClass]="task.statusClass">{{ task.status }}</span></div>
-          <div role="cell">{{ task.assignee }}</div>
-          <div role="cell">{{ task.dueDate }}</div>
-          <div role="cell"><a class="link" [routerLink]="['/tasks', task.id]">Megnyitás</a></div>
+          <div role="cell" data-label="Állapot"><span class="badge" [ngClass]="task.statusClass">{{ task.status }}</span></div>
+          <div role="cell" data-label="Felelős">{{ task.assignee }}</div>
+          <div role="cell" data-label="Határidő">{{ task.dueDate }}</div>
+          <div role="cell" data-label="Művelet"><a class="link" [routerLink]="['/tasks', task.id]">Megnyitás</a></div>
         </div>
       </div>
 
-      <p class="task__meta">{{ tasks().length }} / {{ tasks().length }} feladat <span>·</span> Rendezés: azonosító</p>
+      <p class="task__meta">{{ filteredTasks().length }} / {{ tasks().length }} feladat <span>·</span> Rendezés: azonosító</p>
     </div>
     </ng-template>
+    </ng-template>
+    </ng-container>
+    <ng-template #loadingOrError>
+      <div class="content">
+        <div class="state-card" *ngIf="loadState() === 'loading'; else apiError" role="status" aria-live="polite">
+          <div class="state-card__badge">Betöltés</div>
+          <h2>Feladatok betöltése...</h2>
+          <div class="state-card__skeleton" aria-hidden="true"><span></span><span></span><span></span></div>
+        </div>
+        <ng-template #apiError>
+          <div class="state-card" role="alert">
+            <div class="state-card__badge state-card__badge--danger">API hiba</div>
+            <h2>Nem érhető el a kiszolgáló</h2>
+            <p class="state-card__description">Az adatok betöltése nem sikerült. Próbáld meg újra néhány pillanat múlva.</p>
+            <button class="btn-primary" type="button" (click)="reloadTasks()">Újrapróbálás</button>
+          </div>
+        </ng-template>
+      </div>
     </ng-template>
   </main>
 </div>
