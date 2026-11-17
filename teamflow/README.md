@@ -1,5 +1,5 @@
 # Teamflow
-
+# Készítette Pásztor Ferenc és Kasza Hunor
 ## Telepítés, build és tesztek
 
 Az alkalmazás parancsait ebből a `teamflow` könyvtárból kell futtatni. Tiszta
