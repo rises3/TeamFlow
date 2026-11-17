@@ -1,9 +1,7 @@
-import { Component } from '@angular/core';
-
-@Component({
-  imports: [],
-  selector: 'app-comments',
-  styleUrl: './comments.css',
-  templateUrl: './comments.html',
-})
-export class Comments {}
+export interface Comment {
+  id: number;
+  taskId: number;
+  userId: number;
+  body: string;
+  createdAt: string; // UTC ISO időpont
+}

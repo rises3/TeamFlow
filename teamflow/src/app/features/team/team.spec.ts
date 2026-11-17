@@ -1,4 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideRouter } from '@angular/router';
 import { Team } from './team';
 
 describe('Team', () => {
@@ -8,6 +9,7 @@ describe('Team', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [Team],
+      providers: [provideRouter([])],
     }).compileComponents();
 
     fixture = TestBed.createComponent(Team);
@@ -17,5 +19,10 @@ describe('Team', () => {
 
   it('should create', () => {
     expect(component).toBeTruthy();
+  });
+
+  it('starts with an empty member list', () => {
+    expect(component.members()).toEqual([]);
+    expect(component.activeMemberCount()).toBe(0);
   });
 });

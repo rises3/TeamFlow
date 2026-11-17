@@ -1,1 +1,109 @@
-<p>team works!</p>
+<div class="app">
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="brand__logo">T</div>
+      <span class="brand__name">TeamFlow</span>
+    </div>
+
+    <div class="nav__label">Munkaterület</div>
+    <nav aria-label="Fő navigáció">
+      <a class="nav__item" [routerLink]="['/dashboard']">
+        <span class="nav__icon">A</span>
+        Áttekintés
+      </a>
+      <a class="nav__item" [routerLink]="['/tasks']">
+        <span class="nav__icon">F</span>
+        Feladatok
+      </a>
+      <a class="nav__item" [routerLink]="['/projects']">
+        <span class="nav__icon">P</span>
+        Projektek
+      </a>
+      <a class="nav__item nav__item--active" [routerLink]="['/team']" aria-current="page">
+        <span class="nav__icon">C</span>
+        Csapat
+      </a>
+      <a class="nav__item" [routerLink]="['/admin']">
+        <span class="nav__icon">T</span>
+        Törzsadatok
+      </a>
+    </nav>
+
+    <div class="user">
+      <div class="user__avatar">KA</div>
+      <div>
+        <div class="user__name">Kiss Anna</div>
+        <div class="user__role">Csapattag</div>
+      </div>
+    </div>
+  </aside>
+
+  <main class="main">
+    <header class="topbar">
+      <div class="breadcrumb">Frontend projekt <span>/</span> Csapatmunka</div>
+      <div class="pill">{{ members().length }} csapattag</div>
+    </header>
+
+    <div class="content">
+      <div class="page-head team__head">
+        <div>
+          <h1 class="page-title">Csapat</h1>
+          <p class="page-sub">{{ activeMemberCount() }} aktív csapattag</p>
+        </div>
+        <button class="btn-primary" type="button" (click)="startCreate()">+ Új csapattag</button>
+      </div>
+
+      <form
+        class="detail-card edit-task-form team-form"
+        *ngIf="formMode()"
+        #memberForm="ngForm"
+        (ngSubmit)="saveMember()"
+      >
+        <h2 class="detail-card__title">{{ formMode() === 'create' ? 'Új csapattag' : 'Csapattag szerkesztése' }}</h2>
+        <div class="team-form__fields">
+          <label>
+            Név *
+            <input name="name" [(ngModel)]="draft.name" placeholder="Teljes név" required />
+          </label>
+          <label>
+            E-mail-cím *
+            <input name="email" [(ngModel)]="draft.email" type="email" placeholder="nev@example.com" required email />
+          </label>
+          <label>
+            Szerepkör *
+            <input name="role" [(ngModel)]="draft.role" placeholder="Pl. Frontend fejlesztő" required />
+          </label>
+          <label>
+            Állapot
+            <select name="active" [(ngModel)]="draft.active">
+              <option [ngValue]="true">Aktív</option>
+              <option [ngValue]="false">Inaktív</option>
+            </select>
+          </label>
+        </div>
+        <div class="task-detail__actions">
+          <button class="btn-outline" type="button" (click)="cancelForm()">Mégse</button>
+          <button class="btn-primary" type="submit" [disabled]="memberForm.invalid">Mentés</button>
+        </div>
+      </form>
+
+      <section class="team-grid" aria-label="Csapattagok">
+        <article class="team-card" *ngFor="let member of members()">
+          <div class="team-card__top">
+            <div class="team-card__avatar">{{ member.initials }}</div>
+            <span class="project-card__status">{{ member.active ? 'Aktív' : 'Inaktív' }}</span>
+          </div>
+          <h2 class="team-card__name">{{ member.name }}</h2>
+          <a class="team-card__email" [href]="'mailto:' + member.email">{{ member.email }}</a>
+          <p class="team-card__role">{{ member.role }}</p>
+          <div class="team-card__actions">
+            <button class="project-card__link" type="button" (click)="startEdit(member)">Szerkesztés</button>
+            <button class="project-card__link team-card__delete" type="button" (click)="deleteMember(member)">Törlés</button>
+          </div>
+        </article>
+      </section>
+
+      <p class="team__note">A csapattagok a feladatok felelőseiként is kiválaszthatók.</p>
+    </div>
+  </main>
+</div>

@@ -1,9 +1,6 @@
-import { Component } from '@angular/core';
-
-@Component({
-  imports: [],
-  selector: 'app-checklistitems',
-  styleUrl: './checklistitems.css',
-  templateUrl: './checklistitems.html',
-})
-export class Checklistitems {}
+export interface ChecklistItem {
+  id: number;
+  taskId: number;
+  text: string;
+  done: boolean;
+}
