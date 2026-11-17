@@ -1,0 +1,10 @@
+<dialog #dialog class="confirm-delete" aria-labelledby="confirm-delete-title" aria-describedby="confirm-delete-description" (cancel)="cancelled.emit()">
+  <div class="state-card__badge state-card__badge--danger">Törlési párbeszéd</div>
+  <h2 id="confirm-delete-title">{{ title }}</h2>
+  <p class="confirm-delete__item">{{ item }}</p>
+  <p id="confirm-delete-description" class="state-card__description">{{ description }}</p>
+  <div class="confirm-delete__actions">
+    <button class="btn-outline" type="button" autofocus (click)="cancelled.emit()">Mégse</button>
+    <button class="btn-danger" type="button" (click)="confirmed.emit()">Törlés</button>
+  </div>
+</dialog>

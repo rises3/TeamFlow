@@ -1,0 +1,27 @@
+{
+  "tasks": [
+    { "id": 1, "title": "Reszponzív feladatlista", "project": "TeamFlow webalkalmazás", "description": "A feladatlista asztali és mobil nézetének elkészítése.", "status": "Folyamatban", "statusClass": "badge--progress", "priority": "Magas", "assignee": "Kiss Anna", "dueDate": "2026.12.04.", "estimate": "6 óra", "tracked": "2,5 óra" },
+    { "id": 2, "title": "API service réteg", "project": "TeamFlow webalkalmazás", "description": "Az API-kéréseket kezelő szolgáltatási réteg elkészítése.", "status": "Tervezett", "statusClass": "badge--planned", "priority": "Közepes", "assignee": "Nagy Bence", "dueDate": "2026.12.05.", "estimate": "4 óra", "tracked": "0 óra" },
+    { "id": 3, "title": "Dashboard statisztikák", "project": "TeamFlow webalkalmazás", "description": "A dashboard statisztikai adatainak megjelenítése.", "status": "Kész", "statusClass": "badge--done", "priority": "Közepes", "assignee": "Kiss Anna", "dueDate": "2026.12.03.", "estimate": "3 óra", "tracked": "3 óra" },
+    { "id": 4, "title": "Űrlap validáció", "project": "TeamFlow webalkalmazás", "description": "Az űrlapok adatainak ellenőrzése.", "status": "Tervezett", "statusClass": "badge--planned", "priority": "Alacsony", "assignee": "Nagy Bence", "dueDate": "2026.12.07.", "estimate": "2 óra", "tracked": "0 óra" },
+    { "id": 5, "title": "Projekt részletező", "project": "Dokumentáció", "description": "A projekt részletező oldal elkészítése.", "status": "Folyamatban", "statusClass": "badge--progress", "priority": "Magas", "assignee": "Kiss Anna", "dueDate": "2026.12.08.", "estimate": "5 óra", "tracked": "1 óra" },
+    { "id": 6, "title": "Angol prezentáció", "project": "Dokumentáció", "description": "A projekthez tartozó prezentáció elkészítése.", "status": "Tervezett", "statusClass": "badge--planned", "priority": "Alacsony", "assignee": "Nagy Bence", "dueDate": "2026.12.11.", "estimate": "2 óra", "tracked": "0 óra" }
+  ],
+  "posts": [
+    {
+      "id": 1,
+      "title": "json-server",
+      "author": "typicode"
+    }
+  ],
+  "comments": [
+    {
+      "id": 1,
+      "body": "some comment",
+      "postId": 1
+    }
+  ],
+  "profile": {
+    "name": "typicode"
+  }
+}

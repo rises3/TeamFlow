@@ -1,0 +1,75 @@
+<div class="app">
+  <app-sidebar />
+
+  <main class="main">
+    <app-confirm-delete
+      *ngIf="pendingDelete() as member"
+      title="Törlöd ezt a csapattagot?"
+      [item]="member.name"
+      (cancelled)="pendingDelete.set(null)"
+      (confirmed)="confirmDelete()"
+    />
+    <div class="content">
+      <div class="page-head team__head">
+        <div>
+          <h1 class="page-title">Csapat</h1>
+          <p class="page-sub">{{ activeMemberCount() }} aktív csapattag</p>
+        </div>
+        <button class="btn-primary" type="button" (click)="startCreate()">+ Új csapattag</button>
+      </div>
+
+      <form
+        class="detail-card edit-task-form team-form"
+        *ngIf="formMode()"
+        #memberForm="ngForm"
+        (ngSubmit)="saveMember()"
+      >
+        <h2 class="detail-card__title">{{ formMode() === 'create' ? 'Új csapattag' : 'Csapattag szerkesztése' }}</h2>
+        <div class="team-form__fields">
+          <label>
+            Név *
+            <input name="name" [(ngModel)]="draft.name" placeholder="Teljes név" required />
+          </label>
+          <label>
+            E-mail-cím *
+            <input name="email" [(ngModel)]="draft.email" type="email" placeholder="nev@example.com" required email />
+          </label>
+          <label>
+            Szerepkör *
+            <input name="role" [(ngModel)]="draft.role" placeholder="Pl. Frontend fejlesztő" required />
+          </label>
+          <label>
+            Állapot
+            <select name="active" [(ngModel)]="draft.active">
+              <option [ngValue]="true">Aktív</option>
+              <option [ngValue]="false">Inaktív</option>
+            </select>
+          </label>
+        </div>
+        <div class="task-detail__actions">
+          <button class="btn-outline" type="button" (click)="cancelForm()">Mégse</button>
+          <button class="btn-primary" type="submit" [disabled]="memberForm.invalid">Mentés</button>
+        </div>
+        <p *ngIf="validationError" role="alert">{{ validationError }}</p>
+      </form>
+
+      <section class="team-grid" aria-label="Csapattagok">
+        <article class="team-card" *ngFor="let member of members()">
+          <div class="team-card__top">
+            <div class="team-card__avatar">{{ member.initials }}</div>
+            <span class="project-card__status">{{ member.active ? 'Aktív' : 'Inaktív' }}</span>
+          </div>
+          <h2 class="team-card__name">{{ member.name }}</h2>
+          <a class="team-card__email" [href]="'mailto:' + member.email">{{ member.email }}</a>
+          <p class="team-card__role">{{ member.role }}</p>
+          <div class="team-card__actions">
+            <button class="project-card__link" type="button" (click)="startEdit(member)">Szerkesztés</button>
+            <button class="project-card__link team-card__delete" type="button" (click)="deleteMember(member)">Törlés</button>
+          </div>
+        </article>
+      </section>
+
+      <p class="team__note">A csapattagok a feladatok felelőseiként is kiválaszthatók.</p>
+    </div>
+  </main>
+</div>

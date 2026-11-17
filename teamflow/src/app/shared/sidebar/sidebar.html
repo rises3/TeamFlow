@@ -1,0 +1,53 @@
+<aside class="sidebar" [class.sidebar--open]="menuOpen()">
+  <div class="sidebar__header">
+    <button
+      class="sidebar__toggle"
+      type="button"
+      [attr.aria-expanded]="menuOpen()"
+      aria-controls="primary-navigation"
+      [attr.aria-label]="menuOpen() ? 'Menü bezárása' : 'Menü megnyitása'"
+      (click)="toggleMenu()"
+    >
+      <span></span>
+      <span></span>
+      <span></span>
+    </button>
+    <div class="brand">
+      <div class="brand__logo">T</div>
+      <span class="brand__name">TeamFlow</span>
+    </div>
+    <div class="sidebar__mobile-user" aria-label="Bejelentkezve: Kiss Anna">KA</div>
+  </div>
+
+  <div class="nav__label">Munkaterület</div>
+  <nav id="primary-navigation" aria-label="Fő navigáció">
+    <a class="nav__item" [routerLink]="['/dashboard']" routerLinkActive="nav__item--active" ariaCurrentWhenActive="page" [routerLinkActiveOptions]="{ exact: true }" (click)="closeMenu()">
+      <span class="nav__icon">A</span>
+      Áttekintés
+    </a>
+    <a class="nav__item" [routerLink]="['/tasks']" routerLinkActive="nav__item--active" ariaCurrentWhenActive="page" (click)="closeMenu()">
+      <span class="nav__icon">F</span>
+      Feladatok
+    </a>
+    <a class="nav__item" [routerLink]="['/projects']" routerLinkActive="nav__item--active" ariaCurrentWhenActive="page" (click)="closeMenu()">
+      <span class="nav__icon">P</span>
+      Projektek
+    </a>
+    <a class="nav__item" [routerLink]="['/team']" routerLinkActive="nav__item--active" ariaCurrentWhenActive="page" (click)="closeMenu()">
+      <span class="nav__icon">C</span>
+      Csapat
+    </a>
+    <a class="nav__item" [routerLink]="['/admin']" routerLinkActive="nav__item--active" ariaCurrentWhenActive="page" (click)="closeMenu()">
+      <span class="nav__icon">T</span>
+      Törzsadatok
+    </a>
+  </nav>
+
+  <div class="user">
+    <div class="user__avatar">KA</div>
+    <div>
+      <div class="user__name">Kiss Anna</div>
+      <div class="user__role">Csapattag</div>
+    </div>
+  </div>
+</aside>
